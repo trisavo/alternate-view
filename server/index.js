@@ -2,6 +2,8 @@ const express=require('express');
 const socketio=require('socket.io');
 const http= require('http');
 
+const {addUser,removeUser,getUser,getUsersInRoom};
+
 const app=express();
 
 const PORT=process.env.PORT || 5000;
@@ -19,6 +21,15 @@ const io=socketio(server);
 
 io.on('connection', (socket) =>{
   console.log('we 1 socket bois');
+
+  socket.on('join',({name,room},callback) =>{
+    console.log(name,room);
+
+  //  const error=true;
+  //  if(error){
+  //  callback({error: 'rip lul'});
+  //} this is error handling
+  })
 
   //run all code inside of socket bc we're all just managing one socket
   socket.on('disconnect',()=>{
