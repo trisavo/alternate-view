@@ -2,7 +2,7 @@ const express=require('express');
 const socketio=require('socket.io');
 const http= require('http');
 
-const {addUser,removeUser,getUser,getUsersInRoom};
+const {addUser,removeUser,getUser,getUsersInRoom} = require('./users.js');
 
 const app=express();
 
@@ -23,13 +23,30 @@ io.on('connection', (socket) =>{
   console.log('we 1 socket bois');
 
   socket.on('join',({name,room},callback) =>{
-    console.log(name,room);
+    const {error,user}=addUser({id:socket.id,name,room});
 
   //  const error=true;
   //  if(error){
   //  callback({error: 'rip lul'});
-  //} this is error handling
+  //} this is error handling and this {error,user} can only take those 2 parameters
+
+    if(error) return callback(error);
+
+    socket.emit('message',{user:'admin',text:`${user.name} has finally met their fate in ${user.room}`});
+    socket.broadcast.to(user.room).emit('message',{user:'admin',text: `${user.name} has joined the rest of u sad bois`});
+    //broadcast sends message to everyone besides curernt user
+    socket.join(user.room);
+
+    callback();
   })
+
+socket.on('sendMessage',(message,callback)=>{
+  const user=getUser(socket.id);
+
+  io.to(user.room).emit('message',{user:user.name,text:message});
+  callback();
+});
+
 
   //run all code inside of socket bc we're all just managing one socket
   socket.on('disconnect',()=>{
