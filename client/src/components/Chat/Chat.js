@@ -1,88 +1,67 @@
-import React,{useState, useEffect} from 'react';
+import React, { useState, useEffect } from "react";
 import queryString from 'query-string';
-import io from 'socket.io-client';
+import io from "socket.io-client";
+
+import TextContainer from '../TextContainer/TextContainer';
+import Messages from '../Messages/Messages';
+import InfoBar from '../InfoBar/InfoBar';
+import Input from '../Input/Input';
 
 import './Chat.css';
-import InfoBar from '../InfoBar/InfoBar'
-import Input from '../Input/Input'
-{/*
-  useSTate and useEffect are called effect-hooks, plz research
-  querystring takes in data from the url
-*/}
-
-
 
 let socket;
 
+const Chat = ({ location }) => {
+  const [name, setName] = useState('');
+  const [room, setRoom] = useState('');
+  const [users, setUsers] = useState('');
+  const [message, setMessage] = useState('');
+  const [messages, setMessages] = useState([]);
+  const ENDPOINT = 'localhost:3000';
 
+  useEffect(() => {
+    const { name, room } = queryString.parse(location.search);
 
-const Chat = ({location}) =>{
-const [name,setName]=useState('');
-const [room,setRoom]=useState('');
-const[messages,setMessages]=useState([]);
-const[message,setMessage]=useState('');
-const endpoint='localhost:5000';
+    socket = io(ENDPOINT);
 
-  useEffect(()=>{
-    const {name,room}=queryString.parse(location.search);
-
-    socket=io(endpoint);
-    {/*
-      change endpoint variable to another port once localhost isnt there
-    */}
-
-    setName(name);
     setRoom(room);
+    setName(name)
 
-    socket.emit('join',{name,room},()=>{
+    socket.emit('join', { name, room }, (error) => {
+      if(error) {
+        alert(error);
+      }
+    });
+  }, [ENDPOINT, location.search]);
 
+  useEffect(() => {
+    socket.on('message', message => {
+      setMessages(messages => [ ...messages, message ]);
     });
 
-    return () =>{
-      socket.emit('disconnect');
+    socket.on("roomData", ({ users }) => {
+      setUsers(users);
+    });
+}, []);
 
-      socket.off();
+  const sendMessage = (event) => {
+    event.preventDefault();
+
+    if(message) {
+      socket.emit('sendMessage', message, () => setMessage(''));
     }
-    console.log(socket);
-  }, [endpoint,location.search]);
-
-
-{/*
-  [endpoint,location.search sets it so that it only shows if there's a change do we re-render the use effect]
-*/}
-
-//function for adding messages to the total array
-useEffect(()=>{
-  socket.on('message',(message)=>{
-    setMessages([...messages,message]);
-
-  })
-},[messages])
-//function for sending messages
-const sendMessage=(event)=>{
-  event.preventDefault();
-//prevents full browser refreshes
-  if(message){
-    socket.emit('sendMessage',message,()=>setMessage(''));
   }
-}
 
-console.log(message,messages);
-
-  return(
+  return (
     <div className="outerContainer">
       <div className="container">
-      <InfoBar room={room}/>
-      <Input message={message} setMessage={setMessage} sendMessage={sendMessage}/>
-      {/*
-//        <input value={message}
-//        onChange={(event)=>setMessage(event.target.value)}
-//        onKeyPress={(event)=>event.key==='Enter'? sendMessage(event) : null}/>
-*/}
-
+          <InfoBar room={room} />
+          <Messages messages={messages} name={name} />
+          <Input message={message} setMessage={setMessage} sendMessage={sendMessage} />
       </div>
-
+      <TextContainer users={users}/>
     </div>
-  )
+  );
 }
+
 export default Chat;
