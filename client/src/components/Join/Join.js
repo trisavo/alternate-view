@@ -13,7 +13,7 @@ const Join = () =>{
         {/* we use className instead of class bc this is JSX not html*/}
         <div><input placeholder="Name" className="joinInput" type="text" onChange={(event)=> setName(event.target.value)} /></div>
         <div><input placeholder="Room" className="joinInput mt-20" type="text" onChange={(event)=> setRoom(event.target.value)} /></div>
-        <Link onClick={event => (!name || !room) ? event.preventDefault(): null}to={`/chat?name=${name}&room=${room}`}>
+        <Link onClick={event => (!name || !room ) ? event.preventDefault(): null}to={`/chat?name=${name}&room=${room}`}>
         {/* if there is no name or room, do nothing
         //creates a link that redirects to /chat, ? sets more specifics. ${} is the variable name and & is and
         */}

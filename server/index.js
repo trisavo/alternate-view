@@ -7,36 +7,29 @@ const {addUser,removeUser,getUser,getUsersInRoom} = require('./users.js');
 
 const app=express();
 
-const PORT=process.env.PORT || 5000;
-//listens for port for deployment, if not deployed, then run locally on port 3000
+const PORT= 5000;
 
 const router=require('./router');
 //calls the router that we made
-
-//go to socket.io and find the documentation after control+f 'node'
-
-// we use require because we're now dealing with server and backend, not react
 
 const server=http.createServer(app);
 const io=socketio(server);
 
 app.use(router);
 app.use(cors());
+
+
 io.on('connection', (socket) =>{
+
   console.log('we 1 socket bois');
 
   socket.on('join',({name,room},callback) =>{
     const {error,user}=addUser({id:socket.id,name,room});
 
-  //  const error=true;
-  //  if(error){
-  //  callback({error: 'rip lul'});
-  //} this is error handling and this {error,user} can only take those 2 parameters
-
     if(error) return callback(error);
 
-    socket.emit('message',{user:'admin',text:`${user.name} has finally met their fate in ${user.room}`});
-    socket.broadcast.to(user.room).emit('message',{user:'admin',text: `${user.name} has joined the rest of u sad bois`});
+    socket.emit('message',{user:'',text:`${user.name} has finally met their fate in ${user.room}`});
+    socket.broadcast.to(user.room).emit('message',{user:'',text: `${user.name} has joined the rest of u sad bois`});
     //broadcast sends message to everyone besides curernt user
     socket.join(user.room);
 
@@ -56,11 +49,10 @@ socket.on('sendMessage',(message,callback)=>{
     const user = removeUser(socket.id);
 
     if(user) {
-      io.to(user.room).emit('message', { user: 'Admin', text: `${user.name} has left.` });
+      io.to(user.room).emit('message', { user: '', text: `${user.name} has left.` });
       io.to(user.room).emit('roomData', { room: user.room, users: getUsersInRoom(user.room)});
     }
 
-    console.log(user.name + " has left.");
   });
 });
 
