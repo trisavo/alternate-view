@@ -17,7 +17,8 @@ const Chat = ({ location }) => {
   const [users, setUsers] = useState('');
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([]);
-  const ENDPOINT = 'https://mouses-and-leaves.herokuapp.com/';
+  const ENDPOINT = 'localhost:5000';
+  //const ENDPOINT = 'https://mouses-and-leaves.herokuapp.com/';
 
   useEffect(() => {
     const { name, room } = queryString.parse(location.search);
@@ -59,9 +60,7 @@ const Chat = ({ location }) => {
           <Messages messages={messages} name={name} />
           <Input message={message} setMessage={setMessage} sendMessage={sendMessage} />
       </div>
-      {
-        <TextContainer users={users}/>
-      }
+     
 
     </div>
   );
