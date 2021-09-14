@@ -53,7 +53,14 @@ socket.on('sendMessage',(message,callback)=>{
 
   //run all code inside of socket bc we're all just managing one socket
   socket.on('disconnect',()=>{
-    console.log('sad boi hours :c');
+    const user = removeUser(socket.id);
+
+    if(user) {
+      io.to(user.room).emit('message', { user: 'Admin', text: `${user.name} has left.` });
+      io.to(user.room).emit('roomData', { room: user.room, users: getUsersInRoom(user.room)});
+    }
+
+    console.log(user.name + " has left.");
   });
 });
 
